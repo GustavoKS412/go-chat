@@ -19,3 +19,12 @@ func (t *templateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	})
 	t.templ.Execute(w, r)
 }
+
+func roomHandler(w http.ResponseWriter, r *http.Request) {
+	roomName := r.URL.Query().Get("room")
+	if roomName == "" {
+		http.Error(w, "room name is required", http.StatusBadRequest)
+		return
+	}
+	getRoom(roomName).ServeHTTP(w, r)
+}
