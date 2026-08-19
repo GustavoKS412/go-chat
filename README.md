@@ -1,16 +1,19 @@
 # Go-Chat
 
-Um app de chat em tempo real, feito em Go, usando WebSockets pra parte de mensagens.
+[![English](https://img.shields.io/badge/lang-English-blue)](README.md)
+[![Português](https://img.shields.io/badge/lang-Portugu%C3%AAs-green)](README.pt-BR.md)
 
-Fiz esse projeto pra praticar. Não é pra ser uma plataforma de chat completa, é só um exemplo funcional de salas + mensagens ao vivo sem usar nenhum framework JS.
+A real-time chat app built in Go, using WebSockets for the messaging part.
 
-## Sobre o projeto
+I made this project to practice. It's not meant to be a full chat platform, it's just a working example of rooms + live messages without using any JS framework.
 
-Cada usuário entra digitando o nome de uma sala. Se a sala ainda não existe, o servidor cria ela na hora; se já existe, o usuário entra na sala já existente com quem mais estiver lá.
+## About the project
 
-Ao conectar, cada cliente recebe um nome de convidado aleatório, não tem login nem cadastro. As mensagens trafegam por WebSocket e são retransmitidas pro servidor pra todo mundo que tá na mesma sala. Como não tem persistência, ao fechar a aba, o histórico e a identidade do usuário somem.
+Each user joins by typing the name of a room. If the room doesn't exist yet, the server creates it on the spot; if it already exists, the user joins the existing room with whoever else is in there.
 
-## Tecnologias
+On connecting, each client gets a random guest name, there's no login or sign-up. Messages travel over WebSocket and get broadcast by the server to everyone in the same room. Since there's no persistence, closing the tab wipes the history and the user's identity.
+
+## Tech stack
 
 - Go
 - Gorilla WebSocket
@@ -18,7 +21,7 @@ Ao conectar, cada cliente recebe um nome de convidado aleatório, não tem login
 - CSS
 - JavaScript
 
-## Estrutura do projeto
+## Project structure
 
 ```text
 go-chat/
@@ -35,13 +38,13 @@ go-chat/
         └── chat.js
 ```
 
-## Como executar o projeto
+## How to run the project
 
-### Pré-requisitos
+### Prerequisites
 
-- Go instalado (confira a versão no `go.mod`)
+- Go installed (check the version in `go.mod`)
 
-### Passos
+### Steps
 
 ```bash
 git clone https://github.com/GustavoKS412/go-chat.git
@@ -50,4 +53,4 @@ go mod download
 go run .
 ```
 
-A aplicação sobe em `http://localhost:8080`. É só abrir no navegador, digitar o nome de uma sala e entrar no chat.
+The app runs on `http://localhost:8080`. Just open it in your browser, type a room name, and join the chat.
