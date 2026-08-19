@@ -12,24 +12,34 @@ import (
 type templateHandler struct {
 	once     sync.Once
 	filename string
-	template *template.Template
+	templ    *template.Template
 }
 
 func (t *templateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	t.template = template.Must(template.ParseFiles(filepath.Join("templates", t.filename)))
-	t.template.Execute(w, r)
+	t.once.Do(func() {
+		t.templ = template.Must(template.ParseFiles(filepath.Join("templates", t.filename)))
+	})
+	t.templ.Execute(w, r)
 }
 func main() {
-	var addr = flag.String("addr", "localhost:8080", "http service address")
+	var addr = flag.String("addr", ":8080", "http address")
 	flag.Parse()
-	r := newRoom()
-
-	http.Handle("/room", r)
-	go r.run()
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+	http.Handle("/", &templateHandler{filename: "index.html"})
+	http.Handle("/chat", &templateHandler{filename: "chat.html"})
+	http.HandleFunc("/room", func(w http.ResponseWriter, r *http.Request) {
+		roomName := r.URL.Query().Get("room")
+		if roomName == "" {
+			http.Error(w, "room name is required", http.StatusBadRequest)
+			return
+		}
+		realRoom := getRoom(roomName)
+		realRoom.ServeHTTP(w, r)
+	})
 
 	log.Printf("Starting web server on %s", *addr)
 
 	if err := http.ListenAndServe(*addr, nil); err != nil {
-		log.Fatal("Listen and serve:", err)
+		log.Fatal("ListenAndServe:", err)
 	}
 }
