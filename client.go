@@ -1,6 +1,11 @@
 package main
 
-import "github.com/gorilla/websocket"
+import (
+	"encoding/json"
+	"fmt"
+
+	"github.com/gorilla/websocket"
+)
 
 type client struct {
 	socket *websocket.Conn
@@ -8,6 +13,8 @@ type client struct {
 	receive chan []byte
 
 	room *room
+
+	name string
 }
 
 func (c *client) read() {
@@ -19,7 +26,17 @@ func (c *client) read() {
 		if err != nil {
 			return
 		}
-		c.room.forward <- message
+		outgoing := map[string]string{
+			"name":    c.name,
+			"message": string(message),
+		}
+		jsMessage, err := json.Marshal(outgoing)
+
+		if err != nil {
+			fmt.Println("Encoding error", err)
+			continue
+		}
+		c.room.forward <- jsMessage
 	}
 }
 
