@@ -8,6 +8,12 @@
 *.so
 *.dylib
 
+# Build output
+/bin/
+/dist/
+/go-chat
+/tmp/
+
 # Test binary, built with `go test -c`
 *.test
 
@@ -26,7 +32,22 @@ go.work.sum
 
 # env file
 .env
+.env.local
+
+# Logs
+*.log
+
+# Local databases (sqlite, etc.)
+*.db
+*.sqlite
+*.sqlite3
 
 # Editor/IDE
-# .idea/
-# .vscode/
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
