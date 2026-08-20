@@ -5,7 +5,6 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
-	"sync"
 
 	"github.com/gorilla/websocket"
 )
@@ -32,15 +31,15 @@ func newRoom() *room {
 func (r *room) run() {
 	for {
 		select {
-		case client := <-r.join:
-			r.clients[client] = true
+		case c := <-r.join:
+			r.clients[c] = true
 
-		case client := <-r.leave:
-			delete(r.clients, client)
-			close(client.receive)
-		case message := <-r.forward:
-			for client := range r.clients {
-				client.receive <- message
+		case c := <-r.leave:
+			delete(r.clients, c)
+			close(c.receive)
+		case msg := <-r.forward:
+			for c := range r.clients {
+				c.receive <- msg
 			}
 		}
 	}
@@ -53,47 +52,21 @@ const (
 
 var upgrader = &websocket.Upgrader{ReadBufferSize: socketBufferSize, WriteBufferSize: socketBufferSize}
 
-var rooms = make(map[string]*room)
-
-var mu sync.Mutex
-
-func getRoom(name string) *room {
-	mu.Lock()
-	defer mu.Unlock()
-
-	if r, ok := rooms[name]; ok {
-		return r
-	}
-
-	r := newRoom()
-	rooms[name] = r
-	go r.run()
-	return r
-}
-
 func (r *room) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	roomName := req.URL.Query().Get("room")
-	if roomName == "" {
-		http.Error(w, "room name is required", http.StatusBadRequest)
-		return
-	}
-
-	realRoom := getRoom(roomName)
-
 	socket, err := upgrader.Upgrade(w, req, nil)
 	if err != nil {
 		log.Println("Upgrade error:", err)
 		return
 	}
 
-	client := &client{
+	c := &client{
 		socket:  socket,
 		receive: make(chan []byte, messageBufferSize),
-		room:    realRoom,
+		room:    r,
 		name:    fmt.Sprintf("Guest_%d", rand.Intn(100000)),
 	}
-	realRoom.join <- client
-	defer func() { realRoom.leave <- client }()
-	go client.write()
-	client.read()
+	r.join <- c
+	defer func() { r.leave <- c }()
+	go c.write()
+	c.read()
 }
